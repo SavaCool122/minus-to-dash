@@ -1,23 +1,35 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import {remark} from 'remark'
-import plugin from './minusToDash.js'
 import {unified} from 'unified'
 import remarkStringify from 'remark-stringify'
 import remarkParse from 'remark-parse'
 
-const PROJECT_PATH = './src'
+const PROJECT_PATH = './example'
+
+const plugin = () => tree => {
+	const pendingNodes = [...tree.children]
+	while (pendingNodes.length) {
+		const currentNode = pendingNodes.shift()
+		if (currentNode?.children?.length > 0) {
+			pendingNodes.push(...currentNode.children)
+		}
+		if (currentNode.type === 'text') {
+			currentNode.value = currentNode.value.replace(' - ', ' — ')
+		}
+	}
+}
+
 
 const findRelevantFiles = () => {
 	const relevantFiles = new Set();
 	const pendingPath = [path.resolve(PROJECT_PATH)];
-	
+
 	while (pendingPath.length > 0) {
 		const currentPath = pendingPath.shift();
 		fs.readdirSync(currentPath, { withFileTypes: true }).forEach((entry) => {
-			
+
 			if (entry.isDirectory() && entry.name === 'node_modules') {
-			
+
 			} else if (entry.isFile() && entry.name.endsWith(".md")) {
 				relevantFiles.add(path.resolve(currentPath, entry.name));
 			} else if (entry.isDirectory()) {
@@ -25,7 +37,7 @@ const findRelevantFiles = () => {
 			}
 		});
 	}
-	
+
 	return Array.from(relevantFiles);
 };
 
@@ -42,9 +54,11 @@ const processMdFiles = (files) => {
 					incrementListMarker: false
 				})
 				.process(doc)
-			
+
 		fs.writeFileSync(filePath, file.value)
 	})
+
+	console.log(`${files.length} files processed`)
 }
 
 const relevantFiles = findRelevantFiles()
