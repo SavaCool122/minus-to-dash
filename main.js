@@ -54,6 +54,7 @@ const processMdFiles = files => {
 
 		//https://github.com/executablebooks/mdformat/issues/112
 		file.value = file.value.replaceAll("\\[", "[")
+		file.value = file.value.replaceAll("\\_", "_")
 		fs.writeFileSync(filePath, file.value)
 	})
 
