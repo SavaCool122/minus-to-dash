@@ -45,7 +45,6 @@ const processMdFiles = files => {
 			.use(plugin)
 			.use(remarkStringify, {
 				bullet: "-",
-				fence: "~",
 				fences: true,
 				incrementListMarker: false,
 				listItemIndent: 'one',
